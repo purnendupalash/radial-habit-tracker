@@ -3,10 +3,30 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Habit Tracker</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<title>Habit Tracker 🐱</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Pacifico&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
+    --bg: #fff0f5;
+    --surface: #ffffff;
+    --text: #3d2040;
+    --muted: #b085a0;
+    --border: #f5c6df;
+    --accent: #ff6b9d;
+    --accent-light: #ffe0ef;
+    --accent2: #ff9ec4;
+    --miss: #fce4f0;
+    --radius: 16px;
+    --canvas-miss: #f9d0e8;
+    --canvas-bg: #fff0f5;
+    --canvas-label: #c87faa;
+    --bow: #ff6b9d;
+    --star: #ffd700;
+    --card-shadow: 0 8px 40px rgba(255, 107, 157, 0.18), 0 2px 8px rgba(255,107,157,0.10);
+  }
+
+  /* === ORIGINAL THEME === */
+  body.theme-original {
     --bg: #f5f2eb;
     --surface: #ffffff;
     --text: #1a1a1a;
@@ -14,25 +34,43 @@
     --border: #e0ddd4;
     --accent: #2c5f4a;
     --accent-light: #e1f0e8;
+    --accent2: #3d8b6a;
     --miss: #e8e4dc;
-    --radius: 12px;
     --canvas-miss: #e8e4dc;
     --canvas-bg: #f5f2eb;
     --canvas-label: #7a7a72;
+    --card-shadow: 0 4px 24px rgba(0,0,0,0.07);
   }
 
-  body.dark {
+  body.theme-original.dark {
     --bg: #161614;
     --surface: #1f1f1c;
     --text: #ffffff;
-    --muted: #ffffff;
+    --muted: #aaaaaa;
     --border: #2e2e28;
     --accent: #3d8b6a;
     --accent-light: #1a3328;
     --miss: #2a2a26;
     --canvas-miss: #2a2a26;
     --canvas-bg: #161614;
-    --canvas-label: #ffffff;
+    --canvas-label: #aaaaaa;
+    --card-shadow: 0 4px 24px rgba(0,0,0,0.3);
+  }
+
+  body.dark {
+    --bg: #1a0d17;
+    --surface: #261320;
+    --text: #ffe0ef;
+    --muted: #cc99bb;
+    --border: #4a2040;
+    --accent: #ff6b9d;
+    --accent-light: #3d1535;
+    --accent2: #ff9ec4;
+    --miss: #2e1226;
+    --canvas-miss: #2e1226;
+    --canvas-bg: #1a0d17;
+    --canvas-label: #cc99bb;
+    --card-shadow: 0 8px 40px rgba(255, 107, 157, 0.12);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -42,13 +80,30 @@
   }
 
   body {
-    font-family: 'DM Mono', monospace;
+    font-family: 'Nunito', sans-serif;
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
     padding: 0;
     overflow-x: hidden;
+    overflow-y: auto;
     transition: background 0.4s ease, color 0.4s ease;
+  }
+
+  /* floating hearts bg */
+  body::before {
+    content: '♡ 🐱 ♡ 🐱 ♡ 🐱 ♡ 🐱 ♡ 🐱';
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    font-size: 18px;
+    color: var(--border);
+    letter-spacing: 2.5rem;
+    padding: 1rem 2rem;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.6;
+    white-space: nowrap;
+    overflow: hidden;
   }
 
   /* SETUP SCREEN */
@@ -59,41 +114,67 @@
     align-items: center;
     justify-content: center;
     padding: 2rem 1.25rem;
+    position: relative;
+    z-index: 1;
+    box-sizing: border-box;
   }
 
   .setup-card {
     background: var(--surface);
-    border-radius: 20px;
-    border: 1px solid var(--border);
-    padding: 2rem 1.5rem;
+    border-radius: 28px;
+    border: 2.5px solid var(--border);
+    padding: 2.25rem 2rem;
     width: 100%;
     max-width: 560px;
+    box-shadow: var(--card-shadow);
+    position: relative;
+    overflow: visible;
+  }
+
+  /* Hello Kitty bow decoration on card */
+  .setup-card::before {
+    content: '';
+    position: absolute;
+    top: -22px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 56px;
+    height: 28px;
+    background: var(--bow);
+    border-radius: 50% 50% 0 0 / 80% 80% 0 0;
+    clip-path: polygon(0% 100%, 50% 0%, 100% 100%);
+    filter: drop-shadow(0 2px 6px rgba(255,107,157,0.4));
+    display: none;
   }
 
   .logo {
-    font-family: 'DM Serif Display', serif;
+    font-family: 'Pacifico', cursive;
     font-size: 2rem;
-    color: var(--text);
+    color: var(--accent);
     margin-bottom: 0.25rem;
+    text-shadow: 2px 2px 0 #ffd6eb, 4px 4px 0 rgba(255,107,157,0.15);
+    letter-spacing: 0.01em;
   }
 
-  .logo span { color: var(--accent); }
+  .logo span { color: var(--text); }
 
   .tagline {
     font-size: 11px;
     color: var(--muted);
-    letter-spacing: 0.08em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     margin-bottom: 2rem;
+    font-weight: 700;
   }
 
   label {
     display: block;
     font-size: 11px;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--muted);
     margin-bottom: 0.5rem;
+    font-weight: 800;
   }
 
   .month-row {
@@ -106,18 +187,20 @@
   select, input[type="text"] {
     width: 100%;
     padding: 0.625rem 0.875rem;
-    border: 1px solid var(--border);
-    border-radius: 8px;
+    border: 2px solid var(--border);
+    border-radius: 14px;
     background: var(--bg);
-    font-family: 'DM Mono', monospace;
+    font-family: 'Nunito', sans-serif;
     font-size: 13px;
+    font-weight: 600;
     color: var(--text);
     outline: none;
-    transition: border-color 0.15s;
+    transition: border-color 0.15s, box-shadow 0.15s;
   }
 
   select:focus, input[type="text"]:focus {
     border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(255,107,157,0.18);
   }
 
   .habits-section { margin-bottom: 1.5rem; }
@@ -131,48 +214,51 @@
   .habit-input-row input {
     flex: 1;
     padding: 0.5rem 0.75rem;
-    border: 1px solid var(--border);
-    border-radius: 8px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
     background: var(--bg);
-    font-family: 'DM Mono', monospace;
+    font-family: 'Nunito', sans-serif;
     font-size: 13px;
+    font-weight: 600;
     color: var(--text);
     outline: none;
   }
 
-  .habit-input-row input:focus { border-color: var(--accent); }
+  .habit-input-row input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(255,107,157,0.15); }
 
   .remove-btn {
-    width: 32px;
-    height: 36px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
+    width: 36px;
+    height: 38px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
     background: transparent;
     color: var(--muted);
     cursor: pointer;
-    font-size: 16px;
+    font-size: 18px;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
     transition: all 0.15s;
+    font-family: 'Nunito', sans-serif;
   }
 
-  .remove-btn:hover { background: #fff0f0; border-color: #f0b0b0; color: #c0392b; }
+  .remove-btn:hover { background: #fff0f0; border-color: #ffb3c8; color: #e05080; }
 
   .add-habit-btn {
     width: 100%;
-    padding: 0.5rem;
-    border: 1px dashed var(--border);
-    border-radius: 8px;
+    padding: 0.55rem;
+    border: 2px dashed var(--border);
+    border-radius: 12px;
     background: transparent;
     color: var(--muted);
     cursor: pointer;
-    font-family: 'DM Mono', monospace;
+    font-family: 'Nunito', sans-serif;
     font-size: 12px;
-    letter-spacing: 0.05em;
+    font-weight: 700;
+    letter-spacing: 0.04em;
     transition: all 0.15s;
-    margin-top: 0.25rem;
+    margin-top: 1rem;
   }
 
   .add-habit-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
@@ -190,13 +276,13 @@
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    border: 2px solid transparent;
+    border: 2.5px solid transparent;
     cursor: pointer;
     transition: transform 0.15s, border-color 0.15s;
   }
 
-  .color-preset:hover { transform: scale(1.15); }
-  .color-preset.selected { border-color: var(--text); transform: scale(1.15); }
+  .color-preset:hover { transform: scale(1.18); }
+  .color-preset.selected { border-color: var(--text); transform: scale(1.18); }
 
   .color-custom {
     width: 28px;
@@ -225,19 +311,22 @@
 
   .generate-btn {
     width: 100%;
-    padding: 0.875rem;
-    background: var(--accent);
+    padding: 0.9rem;
+    background: linear-gradient(135deg, #ff6b9d 0%, #ff9ec4 100%);
     color: #fff;
     border: none;
-    border-radius: 10px;
-    font-family: 'DM Mono', monospace;
-    font-size: 13px;
+    border-radius: 16px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
+    font-weight: 800;
     letter-spacing: 0.06em;
     cursor: pointer;
-    transition: opacity 0.15s, transform 0.1s;
+    transition: opacity 0.15s, transform 0.1s, box-shadow 0.15s;
+    box-shadow: 0 4px 18px rgba(255,107,157,0.4);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.12);
   }
 
-  .generate-btn:hover { opacity: 0.9; }
+  .generate-btn:hover { opacity: 0.93; box-shadow: 0 6px 24px rgba(255,107,157,0.5); }
   .generate-btn:active { transform: scale(0.98); }
 
   @keyframes fadeInUp {
@@ -248,6 +337,12 @@
   @keyframes spinIn {
     from { opacity: 0; transform: rotate(-45deg) scale(0.85); }
     to   { opacity: 1; transform: rotate(0deg) scale(1); }
+  }
+
+  @keyframes heartPop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+    100% { transform: scale(1); }
   }
 
   #tracker-screen.animate-in {
@@ -261,20 +356,25 @@
   /* TRACKER SCREEN */
   #tracker-screen {
     display: none;
-    min-height: 100vh;
+    height: 100vh;
+    max-height: 100vh;
     padding: 0;
     max-width: 100%;
     flex-direction: column;
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
   }
 
   .tracker-header {
     display: flex;
     align-items: center;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 2px solid var(--border);
     background: var(--surface);
     position: sticky;
     top: 0;
     z-index: 10;
+    box-shadow: 0 2px 12px rgba(255,107,157,0.10);
   }
 
   .tracker-header-left {
@@ -283,7 +383,7 @@
     display: flex;
     align-items: center;
     padding: 0.875rem 1rem 0.875rem 1.5rem;
-    border-right: 1px solid var(--border);
+    border-right: 2px solid var(--border);
   }
 
   .tracker-header-center {
@@ -311,7 +411,7 @@
     width: 280px;
     flex-shrink: 0;
     padding: 1.25rem 1rem;
-    border-right: 1px solid var(--border);
+    border-right: 2px solid var(--border);
     background: var(--surface);
     position: sticky;
     top: 56px;
@@ -330,6 +430,8 @@
 
   .habits-sidebar .reset-btn {
     margin-top: auto;
+    flex-shrink: 0;
+    margin-bottom: 1rem;
   }
 
   .chart-col {
@@ -339,35 +441,39 @@
     justify-content: center;
     padding: 1.5rem;
     min-width: 0;
+    background: var(--bg);
   }
 
   .tracker-title {
-    font-family: 'DM Serif Display', serif;
-    font-size: 1.4rem;
-    color: var(--text);
+    font-family: 'Pacifico', cursive;
+    font-size: 1.35rem;
+    color: var(--accent);
+    text-shadow: 1px 1px 0 #ffd6eb;
   }
 
   .tracker-month {
-    font-size: 11px;
+    font-size: 10px;
     color: var(--muted);
-    letter-spacing: 0.08em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
+    font-weight: 800;
   }
 
   .back-btn {
-    padding: 0.4rem 0.75rem;
-    border: 1px solid var(--border);
-    border-radius: 8px;
+    padding: 0.4rem 0.85rem;
+    border: 2px solid var(--border);
+    border-radius: 20px;
     background: transparent;
     color: var(--muted);
     cursor: pointer;
-    font-family: 'DM Mono', monospace;
+    font-family: 'Nunito', sans-serif;
     font-size: 11px;
+    font-weight: 700;
     letter-spacing: 0.05em;
     transition: all 0.15s;
   }
 
-  .back-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .back-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
 
   /* RADIAL CHART */
   .chart-wrapper {
@@ -381,6 +487,7 @@
   #radial-canvas {
     touch-action: none;
     display: block;
+    filter: drop-shadow(0 4px 24px rgba(255,107,157,0.18));
   }
 
   .chart-center-label {
@@ -397,35 +504,47 @@
   }
 
   .chart-center-label .month-label {
-    font-size: 16px;
+    font-size: 13px;
     color: var(--muted);
-    letter-spacing: 0.08em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     display: block;
+    font-weight: 800;
   }
 
   .chart-center-label .year-label {
-    font-family: 'DM Serif Display', serif;
-    font-size: 1.5rem;
-    color: var(--text);
+    font-family: 'Pacifico', cursive;
+    font-size: 1.45rem;
+    color: var(--accent);
     display: block;
+    text-shadow: 1px 1px 0 #ffd6eb;
+  }
+
+  /* kitty icon in center */
+  .chart-center-label::after {
+    content: '♡';
+    font-size: 11px;
+    color: var(--accent);
+    margin-top: 2px;
+    opacity: 0.7;
   }
 
   /* LEGEND */
   .legend-card {
     background: var(--surface);
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
+    border-radius: 20px;
+    border: 2px solid var(--border);
     padding: 1rem 1.25rem;
     margin-bottom: 1rem;
   }
 
   .legend-title {
     font-size: 10px;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--muted);
     margin-bottom: 0.75rem;
+    font-weight: 800;
   }
 
   .legend-list {
@@ -449,12 +568,13 @@
     align-items: center;
     gap: 0.625rem;
     font-size: 13px;
+    font-weight: 600;
     color: var(--text);
   }
 
   .legend-num {
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
     border-radius: 50%;
     background: var(--accent);
     color: #fff;
@@ -463,15 +583,16 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    font-weight: 500;
+    font-weight: 800;
+    box-shadow: 0 2px 6px rgba(255,107,157,0.35);
   }
 
   /* DARK MODE TOGGLE */
   .theme-toggle {
-    width: 40px;
-    height: 22px;
+    width: 44px;
+    height: 24px;
     background: var(--border);
-    border-radius: 11px;
+    border-radius: 12px;
     border: none;
     cursor: pointer;
     position: relative;
@@ -480,19 +601,25 @@
   }
 
   .theme-toggle::after {
-    content: '';
+    content: '🐱';
     position: absolute;
     top: 3px;
     left: 3px;
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
-    background: var(--muted);
+    background: #fff;
     transition: transform 0.2s, background 0.2s;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 18px;
+    text-align: center;
   }
 
   body.dark .theme-toggle { background: var(--accent); }
-  body.dark .theme-toggle::after { transform: translateX(18px); background: #fff; }
+  body.dark .theme-toggle::after { transform: translateX(20px); }
 
   .tracker-header-left {
     display: flex;
@@ -505,38 +632,38 @@
     position: fixed;
     bottom: 1.5rem;
     right: 1.25rem;
-    width: 48px;
-    height: 48px;
+    width: 52px;
+    height: 52px;
     border-radius: 50%;
-    border: 3px solid rgba(255,255,255,0.5);
+    border: 3px solid rgba(255,255,255,0.6);
     cursor: pointer;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 20px rgba(255,107,157,0.45);
     display: none;
     align-items: center;
     justify-content: center;
     z-index: 100;
     transition: transform 0.15s;
-    background: var(--accent);
+    background: linear-gradient(135deg, #ff6b9d, #ff9ec4);
   }
 
-  .color-fab:hover { transform: scale(1.08); }
-  .color-fab-icon { font-size: 18px; pointer-events: none; user-select: none; }
+  .color-fab:hover { transform: scale(1.10); }
+  .color-fab-icon { font-size: 20px; pointer-events: none; user-select: none; }
 
   .color-popup {
     position: fixed;
     bottom: 5.5rem;
     right: 1.25rem;
     background: var(--surface);
-    border: 1px solid var(--border);
+    border: 2px solid var(--border);
     border-radius: 999px;
-    padding: 0.625rem;
+    padding: 0.75rem;
     display: none;
     flex-direction: column;
     align-items: center;
     gap: 0.5rem;
     z-index: 99;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
-    width: 48px;
+    box-shadow: 0 8px 32px rgba(255,107,157,0.20);
+    width: 52px;
   }
 
   .color-popup.open { display: flex; }
@@ -551,27 +678,27 @@
   }
 
   .cp-swatch {
-    width: 28px;
-    height: 28px;
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
-    border: 2px solid transparent;
+    border: 2.5px solid transparent;
     cursor: pointer;
     transition: transform 0.12s, border-color 0.12s;
     flex-shrink: 0;
   }
 
-  .cp-swatch:hover { transform: scale(1.2); }
+  .cp-swatch:hover { transform: scale(1.22); }
 
   .cp-swatch.active {
     border-color: var(--text);
-    box-shadow: 0 0 0 1px var(--bg);
+    box-shadow: 0 0 0 2px var(--bg);
   }
 
   .cp-close-btn {
-    width: 28px;
-    height: 28px;
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
-    border: 1.5px solid var(--border);
+    border: 2px solid var(--border);
     background: transparent;
     color: var(--muted);
     font-size: 16px;
@@ -583,15 +710,16 @@
     flex-shrink: 0;
     transition: all 0.15s;
     margin-top: 2px;
+    font-family: 'Nunito', sans-serif;
   }
 
-  .cp-close-btn:hover { border-color: #c0392b; color: #c0392b; }
+  .cp-close-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
 
   .legend-remove-btn {
     width: 22px;
     height: 22px;
-    border: 1px solid var(--border);
-    border-radius: 6px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
     background: transparent;
     color: var(--muted);
     font-size: 14px;
@@ -603,9 +731,10 @@
     transition: all 0.15s;
     line-height: 1;
     padding: 0;
+    font-family: 'Nunito', sans-serif;
   }
 
-  .legend-remove-btn:hover { background: #fff0f0; border-color: #f0b0b0; color: #c0392b; }
+  .legend-remove-btn:hover { background: #fff0f0; border-color: #ffb3c8; color: #e05080; }
 
   .add-habit-inline {
     display: flex;
@@ -617,11 +746,12 @@
   .add-habit-inline input {
     flex: 1;
     padding: 0.45rem 0.75rem;
-    border: 1px solid var(--border);
-    border-radius: 8px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
     background: var(--bg);
-    font-family: 'DM Mono', monospace;
+    font-family: 'Nunito', sans-serif;
     font-size: 13px;
+    font-weight: 600;
     color: var(--text);
     outline: none;
   }
@@ -632,19 +762,20 @@
     display: block;
     width: 100%;
     padding: 0.75rem;
-    border: 1px solid var(--border);
-    border-radius: 10px;
+    border: 2px solid var(--border);
+    border-radius: 14px;
     background: transparent;
     color: var(--muted);
-    font-family: 'DM Mono', monospace;
+    font-family: 'Nunito', sans-serif;
     font-size: 12px;
-    letter-spacing: 0.05em;
+    font-weight: 700;
+    letter-spacing: 0.04em;
     cursor: pointer;
     margin-top: 0.75rem;
     transition: all 0.15s;
   }
 
-  .reset-btn:hover { border-color: #c0392b; color: #c0392b; }
+  .reset-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
 
   .confirm-bar {
     display: none;
@@ -652,51 +783,146 @@
     gap: 0.5rem;
     margin-top: 0.75rem;
     padding: 0.75rem 1rem;
-    background: #fff5f5;
-    border: 1px solid #f5c0c0;
-    border-radius: 10px;
+    background: var(--accent-light);
+    border: 2px solid var(--border);
+    border-radius: 14px;
     font-size: 12px;
-    color: #c0392b;
-    font-family: 'DM Mono', monospace;
+    color: var(--accent);
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
   }
 
   .confirm-bar span { flex: 1; }
 
   .confirm-yes {
     padding: 0.35rem 0.75rem;
-    background: #c0392b;
+    background: var(--accent);
     color: #fff;
     border: none;
-    border-radius: 6px;
-    font-family: 'DM Mono', monospace;
+    border-radius: 10px;
+    font-family: 'Nunito', sans-serif;
     font-size: 11px;
+    font-weight: 800;
     cursor: pointer;
+    transition: opacity 0.15s;
   }
+
+  .confirm-yes:hover { opacity: 0.88; }
 
   .confirm-no {
     padding: 0.35rem 0.75rem;
     background: transparent;
-    color: #c0392b;
-    border: 1px solid #f5c0c0;
-    border-radius: 6px;
-    font-family: 'DM Mono', monospace;
+    color: var(--accent);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    font-family: 'Nunito', sans-serif;
     font-size: 11px;
+    font-weight: 700;
     cursor: pointer;
   }
 
   .tooltip {
     position: fixed;
-    background: rgba(26,26,26,0.88);
-    color: #fff;
-    font-family: 'DM Mono', monospace;
+    background: rgba(61,32,64,0.92);
+    color: #ffe0ef;
+    font-family: 'Nunito', sans-serif;
     font-size: 11px;
-    padding: 5px 10px;
-    border-radius: 6px;
+    font-weight: 700;
+    padding: 5px 12px;
+    border-radius: 20px;
     pointer-events: none;
     display: none;
     z-index: 200;
     white-space: nowrap;
+    border: 1.5px solid rgba(255,107,157,0.35);
   }
+
+  /* kitty paw stamp on generate btn */
+  .generate-btn::before {
+    content: '🎀 ';
+  }
+
+  /* scrollbar styling */
+  .habits-sidebar::-webkit-scrollbar { width: 4px; }
+  .habits-sidebar::-webkit-scrollbar-track { background: transparent; }
+  .habits-sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  /* === ORIGINAL THEME FONT OVERRIDES === */
+  body.theme-original {
+    font-family: 'DM Mono', monospace;
+  }
+  body.theme-original .logo,
+  body.theme-original .tracker-title {
+    font-family: 'DM Serif Display', serif;
+    text-shadow: none;
+    color: var(--text);
+  }
+  body.theme-original .logo span,
+  body.theme-original .tracker-title span { color: var(--accent); }
+  body.theme-original .chart-center-label .year-label {
+    font-family: 'DM Serif Display', serif;
+    text-shadow: none;
+    color: var(--text);
+  }
+  body.theme-original .generate-btn {
+    background: var(--accent);
+    box-shadow: none;
+  }
+  body.theme-original .generate-btn::before { content: ''; }
+  body.theme-original .setup-card { border-radius: 20px; border-width: 1px; }
+  body.theme-original #radial-canvas { filter: none; }
+  body.theme-original::before { display: none; }
+  body.theme-original .theme-toggle::after { content: ''; background: var(--muted); }
+  body.theme-original.dark .theme-toggle::after { background: #fff; transform: translateX(18px); }
+  body.theme-original .color-fab { background: var(--accent); box-shadow: 0 4px 16px rgba(0,0,0,0.2); }
+  body.theme-original .reset-btn,
+  body.theme-original .confirm-bar,
+  body.theme-original .confirm-yes,
+  body.theme-original .confirm-no {
+    font-family: 'DM Mono', monospace;
+    border-radius: 10px;
+    font-weight: 400;
+  }
+
+  /* === THEME PICKER === */
+  .theme-picker-section { margin-top: 1.25rem; margin-bottom: 0; }
+  .theme-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+
+  .theme-card {
+    border: 2.5px solid var(--border);
+    border-radius: 16px;
+    padding: 0.75rem;
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s;
+    background: var(--bg);
+    text-align: center;
+    position: relative;
+  }
+  .theme-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+  .theme-card.active { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+
+  .theme-card-preview {
+    width: 100%; height: 52px; border-radius: 10px;
+    margin-bottom: 0.5rem;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; gap: 4px;
+  }
+  .theme-card-preview.preview-original { background: #f5f2eb; border: 1.5px solid #e0ddd4; }
+  .theme-card-preview.preview-kitty { background: #fff0f5; border: 1.5px solid #f5c6df; }
+
+  .theme-card-name {
+    font-size: 11px; font-weight: 800;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--muted);
+  }
+  .theme-card.active .theme-card-name { color: var(--accent); }
+
+  .theme-card-check {
+    position: absolute; top: 6px; right: 8px;
+    font-size: 13px; opacity: 0; transition: opacity 0.15s;
+  }
+  .theme-card.active .theme-card-check { opacity: 1; }
+
 </style>
 </head>
 <body>
@@ -705,10 +931,10 @@
 <div id="setup-screen">
   <div class="setup-card">
     <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:0.25rem;">
-      <div class="logo">habit<span>.</span></div>
+      <div class="logo" id="setup-logo">habit<span>🐱</span></div>
       <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode" style="margin-top:0.5rem;"></button>
     </div>
-    <div class="tagline">Monthly Radial Tracker</div>
+    <div class="tagline" id="setup-tagline">🐱 Monthly Radial Tracker 🐱</div>
 
     <div class="month-row">
       <div>
@@ -731,10 +957,30 @@
     <div class="habits-section">
       <label>Habits</label>
       <div id="habit-inputs"></div>
-      <button class="add-habit-btn" onclick="addHabitInput()">+ add habit</button>
+      <button class="add-habit-btn" onclick="addHabitInput()">🐱 add a habit</button>
     </div>
 
     <button class="generate-btn" onclick="generateTracker()">Generate Tracker →</button>
+
+    <div class="theme-picker-section">
+      <label>Theme</label>
+      <div class="theme-cards">
+        <div class="theme-card" id="tc-original" onclick="selectAppTheme('original')">
+          <span class="theme-card-check">✓</span>
+          <div class="theme-card-preview preview-original">
+            <span style="font-family:serif;font-size:15px;color:#2c5f4a;font-weight:bold">habit<span style="color:#2c5f4a">.</span></span>
+          </div>
+          <div class="theme-card-name">Original</div>
+        </div>
+        <div class="theme-card active" id="tc-kitty" onclick="selectAppTheme('kitty')">
+          <span class="theme-card-check">✓</span>
+          <div class="theme-card-preview preview-kitty">
+            <span style="font-size:24px">🐱</span>
+          </div>
+          <div class="theme-card-name">Hello Kitty</div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -745,7 +991,7 @@
       <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode"></button>
     </div>
     <div class="tracker-header-center">
-      <div class="tracker-title">habit<span style="color:var(--accent)">.</span></div>
+      <div class="tracker-title" id="tracker-title-el">habit<span style="color:var(--text)">🐱</span></div>
       <div class="tracker-month" id="tracker-month-label"></div>
     </div>
     <div class="tracker-header-right">
@@ -757,14 +1003,14 @@
     <!-- LEFT: habits sidebar -->
     <div class="habits-sidebar">
       <div class="legend-card">
-        <div class="legend-title">Habits</div>
+        <div class="legend-title" id="legend-title-el">🐱 My Habits</div>
         <div class="legend-list" id="legend-list"></div>
         <div class="add-habit-inline" id="add-habit-inline" style="display:none;">
           <input type="text" id="new-habit-input" placeholder="e.g. Exercise" onkeydown="if(event.key==='Enter')confirmAddHabit();if(event.key==='Escape')cancelAddHabit();">
           <button class="confirm-yes" style="white-space:nowrap;" onclick="confirmAddHabit()">Add</button>
           <button class="confirm-no" onclick="cancelAddHabit()">Cancel</button>
         </div>
-        <button class="add-habit-btn" id="add-habit-tracker-btn" onclick="showAddHabitInline()">+ add habit</button>
+        <button class="add-habit-btn" id="add-habit-tracker-btn" onclick="showAddHabitInline()">🐱 add habit</button>
       </div>
 
       <button class="reset-btn" id="reset-btn" onclick="showResetConfirm()">Reset all data</button>
@@ -796,7 +1042,7 @@
 
 <!-- Reopen FAB -->
 <div class="color-fab" id="color-fab" onclick="openColorPopup()" title="Pick colour">
-  <span class="color-fab-icon">🎨</span>
+  <span class="color-fab-icon">🎀</span>
 </div>
 
 <div class="tooltip" id="tooltip"></div>
@@ -805,7 +1051,7 @@
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const MONTH_SHORT = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
 
-let selectedColor = '#2c5f4a';
+let selectedColor = (localStorage.getItem('habit_app_theme') === 'original') ? '#2c5f4a' : '#ff6b9d';
 let habits = [];
 let monthIndex = 0;
 let year = 2026;
@@ -850,9 +1096,9 @@ function pickCustom(val) {
 }
 
 const PALETTE = [
-  '#2c5f4a','#16a085','#1a6b9e','#3949ab',
-  '#8e44ad','#c0392b','#e67e22','#d4ac0d',
-  '#1a1a1a','#78909c',
+  '#ff6b9d','#ff9ec4','#e05080','#c879d4',
+  '#a855f7','#6366f1','#22b8cf','#10b981',
+  '#f59e0b','#ef4444',
 ];
 
 function buildColorPopup() {
@@ -927,6 +1173,7 @@ function generateTracker() {
   buildLegend();
   setupCanvas(true);
   updateStats();
+  applyAppTheme();
 }
 
 function buildLegend() {
@@ -998,9 +1245,9 @@ function redraw() {
 
   // Read CSS vars for theme-aware colors
   const style = getComputedStyle(document.body);
-  const missColor = style.getPropertyValue('--canvas-miss').trim() || '#e8e4dc';
-  const bgColor = style.getPropertyValue('--canvas-bg').trim() || '#f5f2eb';
-  const labelColor = style.getPropertyValue('--canvas-label').trim() || '#7a7a72';
+  const missColor = style.getPropertyValue('--canvas-miss').trim() || '#f9d0e8';
+  const bgColor = style.getPropertyValue('--canvas-bg').trim() || '#fff0f5';
+  const labelColor = style.getPropertyValue('--canvas-label').trim() || '#c87faa';
 
   // Draw cells + labels
   for (let d = 1; d <= totalDays; d++) {
@@ -1011,9 +1258,21 @@ function redraw() {
     const labelR = outerR + size * 0.055;
     const lx = cx + Math.cos(midAngle) * labelR;
     const ly = cy + Math.sin(midAngle) * labelR;
-    ctx.font = `${fontSize}px DM Mono, monospace`;
+    ctx.font = `700 ${fontSize}px Nunito, sans-serif`;
     ctx.fillStyle = labelColor;
     ctx.fillText(d, lx, ly);
+
+    // Draw a small dot below today's date number
+    if (d === now.getDate() && monthIndex === now.getMonth() && year === now.getFullYear()) {
+      const dotR = Math.max(2, size * 0.007);
+      const dotOffset = fontSize * 1.3;
+      const dotX = lx + Math.cos(midAngle) * dotOffset;
+      const dotY = ly + Math.sin(midAngle) * dotOffset;
+      ctx.beginPath();
+      ctx.arc(dotX, dotY, dotR, 0, 2 * Math.PI);
+      ctx.fillStyle = selectedColor;
+      ctx.fill();
+    }
 
     for (let h = 0; h < habits.length; h++) {
       const ringIdx = habits.length - 1 - h;
@@ -1160,6 +1419,56 @@ function removeHabit(idx) {
 }
 
 function updateStats() {}
+
+// ===== APP THEME (Original vs Kitty) =====
+let appTheme = localStorage.getItem('habit_app_theme') || 'kitty';
+
+function selectAppTheme(theme) {
+  appTheme = theme;
+  localStorage.setItem('habit_app_theme', theme);
+  applyAppTheme();
+}
+
+function applyAppTheme() {
+  const isOriginal = appTheme === 'original';
+  document.body.classList.toggle('theme-original', isOriginal);
+
+  // Update active card
+  document.getElementById('tc-original').classList.toggle('active', isOriginal);
+  document.getElementById('tc-kitty').classList.toggle('active', !isOriginal);
+
+  // Set default selectedColor for each theme
+  selectedColor = isOriginal ? '#2c5f4a' : '#ff6b9d';
+
+  // Swap logo & tagline text
+  const logo = document.getElementById('setup-logo');
+  const tagline = document.getElementById('setup-tagline');
+  const trackerTitle = document.getElementById('tracker-title-el');
+  if (isOriginal) {
+    logo.innerHTML = 'habit<span>.</span>';
+    tagline.textContent = 'Monthly Radial Tracker';
+    if (trackerTitle) trackerTitle.innerHTML = 'habit<span style="color:var(--accent)">.</span>';
+    document.querySelectorAll('.add-habit-btn').forEach(b => { b.textContent = b.textContent.replace('🐱 ', '+ '); });
+    const sidebarBtn = document.getElementById('add-habit-tracker-btn');
+    if (sidebarBtn) sidebarBtn.textContent = '+ add habit';
+    const legendTitle = document.getElementById('legend-title-el');
+    if (legendTitle) legendTitle.textContent = 'MY HABITS';
+  } else {
+    logo.innerHTML = 'habit<span>🐱</span>';
+    tagline.textContent = '🐱 Monthly Radial Tracker 🐱';
+    if (trackerTitle) trackerTitle.innerHTML = 'habit<span style="color:var(--text)">🐱</span>';
+    document.querySelectorAll('.add-habit-btn').forEach(b => { b.textContent = b.textContent.replace('+ ', '🐱 '); });
+    const sidebarBtn = document.getElementById('add-habit-tracker-btn');
+    if (sidebarBtn) sidebarBtn.textContent = '🐱 add habit';
+    const legendTitle = document.getElementById('legend-title-el');
+    if (legendTitle) legendTitle.textContent = '🐱 My Habits';
+  }
+
+  if (canvas) { buildLegend(); redraw(); }
+}
+
+// Restore app theme on load
+applyAppTheme();
 
 function toggleTheme() {
   document.body.classList.toggle('dark');
