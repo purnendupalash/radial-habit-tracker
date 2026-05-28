@@ -916,8 +916,86 @@
   /* ===== MOBILE RESPONSIVE ===== */
   @media (max-width: 700px) {
 
-    /* Tracker screen: allow vertical scroll on mobile */
-    #tracker-screen {
+    /* Setup screen: tighter vertical padding */
+    #setup-screen {
+      padding: 1.25rem 0.875rem;
+      justify-content: flex-start;
+    }
+
+    /* Card: full-width, tighter padding, smaller radius */
+    .setup-card {
+      padding: 1.5rem 1.25rem 1.75rem;
+      border-radius: 20px;
+      max-width: 100%;
+    }
+
+    /* Logo: slightly smaller */
+    .logo {
+      font-size: 1.65rem;
+    }
+
+    /* Month row: stack on very narrow, keep 2-col on mid-size */
+    .month-row {
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    /* Theme cards: stay 2-col but tighter */
+    .theme-cards {
+      gap: 0.5rem;
+    }
+
+    .theme-card {
+      padding: 0.6rem;
+      border-radius: 12px;
+    }
+
+    .theme-card-preview {
+      height: 42px;
+      font-size: 17px;
+    }
+
+    /* Habit inputs: make tap targets comfortable */
+    .habit-input-row input {
+      font-size: 14px;
+      padding: 0.55rem 0.75rem;
+    }
+
+    .remove-btn {
+      width: 40px;
+      height: 42px;
+    }
+
+    /* Generate button: larger tap target */
+    .generate-btn {
+      padding: 1rem;
+      font-size: 15px;
+    }
+
+    /* Tagline: less bottom margin */
+    .tagline {
+      margin-bottom: 1.5rem;
+    }
+
+    /* Color row: allow wrapping */
+    .color-row {
+      gap: 0.45rem;
+    }
+  }
+
+  @media (max-width: 400px) {
+    /* Stack month/year into single column on very small phones */
+    .month-row {
+      grid-template-columns: 1fr;
+    }
+
+    .setup-card {
+      padding: 1.25rem 1rem 1.5rem;
+    }
+  }
+
+
       height: 100dvh;
       max-height: 100dvh;
       overflow: hidden;
@@ -965,10 +1043,14 @@
       border-right: none;
       border-top: 2px solid var(--border);
       padding: 0.75rem 1rem 0.75rem;
-      overflow-y: auto;
+      overflow-y: hidden;
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
+    }
+
+    .habits-sidebar.needs-scroll {
+      overflow-y: auto;
     }
 
     /* Legend card: remove extra card border/padding on mobile */
@@ -1338,6 +1420,7 @@ function generateTracker() {
   updateStats();
   applyAppTheme();
   repositionColorPopup();
+  requestAnimationFrame(checkSidebarScroll);
 }
 
 function buildLegend() {
@@ -1353,6 +1436,7 @@ function buildLegend() {
     `;
     list.appendChild(item);
   });
+  requestAnimationFrame(checkSidebarScroll);
 }
 
 function setupCanvas(animate = false) {
@@ -1693,8 +1777,20 @@ function repositionColorPopup() {
 
 repositionColorPopup();
 
+// ===== MOBILE: enable sidebar scroll only when content overflows =====
+function checkSidebarScroll() {
+  const sidebar = document.querySelector('.habits-sidebar');
+  if (!sidebar) return;
+  if (window.innerWidth <= 700) {
+    sidebar.classList.toggle('needs-scroll', sidebar.scrollHeight > sidebar.clientHeight);
+  } else {
+    sidebar.classList.remove('needs-scroll');
+  }
+}
+
 window.addEventListener('resize', () => {
   repositionColorPopup();
+  checkSidebarScroll();
   if (document.getElementById('tracker-screen').style.display !== 'none' && canvas) {
     setupCanvas();
   }
