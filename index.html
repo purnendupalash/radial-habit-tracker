@@ -1017,13 +1017,17 @@
       height: 100dvh;
       max-height: 100dvh;
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
     }
 
-    /* Header: tighten up */
+    /* Header: fixed height, never shrinks */
     .tracker-header {
       width: 100%;
-      overflow: hidden;
       flex-shrink: 0;
+      position: relative;
+      top: auto;
+      overflow: visible;
     }
 
     .tracker-header-left {
@@ -1057,11 +1061,12 @@
       padding: 0.625rem 0.75rem 0.625rem 0;
     }
 
-    /* Body: stack vertically, canvas on top, sidebar on bottom */
+    /* Body: fill remaining space below header */
     .tracker-body {
-      flex-direction: column;
+      flex: 1;
       min-height: 0;
-      height: calc(100dvh - 52px);
+      height: auto;
+      flex-direction: column;
       overflow: hidden;
     }
 
@@ -1504,7 +1509,9 @@ function setupCanvas(animate = false) {
   const sidebar = document.querySelector('.habits-sidebar');
   const sidebarH = (isMobile && sidebar) ? sidebar.offsetHeight : 0;
   const headerH = document.querySelector('.tracker-header') ? document.querySelector('.tracker-header').offsetHeight : 56;
-  const availH = window.innerHeight - headerH - sidebarH - pad;
+  const availH = isMobile
+    ? (chartCol.clientHeight > 0 ? chartCol.clientHeight - pad : window.innerHeight - headerH - sidebarH - pad)
+    : window.innerHeight - headerH - sidebarH - pad;
   const size = Math.min(availW, availH, 620);
   canvas.width = size;
   canvas.height = size;
@@ -1936,11 +1943,15 @@ window.addEventListener('resize', () => {
 
 // Disable pinch-to-zoom on mobile (exclude canvas so cell taps still work)
 document.addEventListener('touchmove', function(e) {
-  if (e.touches.length > 1 && e.target.id !== 'radial-canvas') e.preventDefault();
+  if (e.touches.length > 1) {
+    // Allow pinch on canvas itself
+    if (e.target === document.getElementById('radial-canvas')) return;
+    e.preventDefault();
+  }
 }, { passive: false });
 
 document.addEventListener('gesturestart', function(e) {
-  if (e.target.id !== 'radial-canvas') e.preventDefault();
+  if (e.target !== document.getElementById('radial-canvas')) e.preventDefault();
 }, { passive: false });
 </script>
 </body>
