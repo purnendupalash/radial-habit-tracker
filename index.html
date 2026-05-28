@@ -916,9 +916,21 @@
   /* ===== MOBILE RESPONSIVE ===== */
   @media (max-width: 700px) {
 
-    /* Setup screen: tighter vertical padding */
+    /* Lock body from bouncing/scrolling */
+    body {
+      overflow: hidden;
+      height: 100dvh;
+      overscroll-behavior: none;
+    }
+
+    /* Setup screen: fill viewport, scroll internally if keyboard pushes content */
     #setup-screen {
-      padding: 1.25rem 0.875rem;
+      height: 100dvh;
+      max-height: 100dvh;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      padding: 1.25rem 0.875rem 2rem;
       justify-content: flex-start;
     }
 
