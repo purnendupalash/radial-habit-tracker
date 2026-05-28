@@ -1073,6 +1073,10 @@
       overflow: hidden;
     }
 
+    .chart-wrapper {
+      overflow: visible;
+    }
+
     /* Sidebar: fixed-height panel at the bottom */
     .habits-sidebar {
       width: 100%;
@@ -1139,9 +1143,9 @@
       font-size: 11px;
     }
 
-    /* Add habit inline input on mobile */
-    .add-habit-inline {
-      margin-top: 0.35rem;
+    /* Hide legend title on mobile — not needed */
+    .legend-title {
+      display: none;
     }
 
     /* Color popup: horizontal bar, sits inside the bottom panel flow */
@@ -1494,16 +1498,21 @@ function setupCanvas(animate = false) {
   ctx = canvas.getContext('2d');
 
   const chartCol = canvas.closest('.chart-col') || document.body;
-  const availW = chartCol.clientWidth - 48;
+  const isMobile = window.innerWidth <= 700;
+  const pad = isMobile ? 16 : 48;
+  const availW = chartCol.clientWidth - pad;
   const sidebar = document.querySelector('.habits-sidebar');
-  const sidebarH = (window.innerWidth <= 700 && sidebar) ? sidebar.offsetHeight : 0;
+  const sidebarH = (isMobile && sidebar) ? sidebar.offsetHeight : 0;
   const headerH = document.querySelector('.tracker-header') ? document.querySelector('.tracker-header').offsetHeight : 56;
-  const availH = window.innerHeight - headerH - sidebarH - 48;
+  const availH = window.innerHeight - headerH - sidebarH - pad;
   const size = Math.min(availW, availH, 620);
   canvas.width = size;
   canvas.height = size;
   canvas.style.width = size + 'px';
   canvas.style.height = size + 'px';
+
+  canvas.style.transform = '';
+  canvas.style.transformOrigin = '';
 
   if (animate) {
     canvas.classList.remove('animate-in');
@@ -1513,7 +1522,86 @@ function setupCanvas(animate = false) {
   canvas.addEventListener('click', handleCanvasClick);
   canvas.addEventListener('mousemove', handleMouseMove);
   canvas.addEventListener('mouseleave', () => { document.getElementById('tooltip').style.display='none'; });
-  canvas.addEventListener('touchstart', e => { e.preventDefault(); handleCanvasClick(e); }, { passive: false });
+
+  // Touch handling: pinch-to-zoom + pan + tap
+  let _touchZoom = 1, _touchPanX = 0, _touchPanY = 0;
+  let _pinchStartDist = 0, _pinchStartZoom = 1;
+  let _panStartX = 0, _panStartY = 0, _panStartPanX = 0, _panStartPanY = 0;
+  let _touchMoved = false, _tapStartX = 0, _tapStartY = 0;
+
+  function _applyTransform() {
+    const maxPan = (canvas.offsetWidth * _touchZoom - canvas.offsetWidth) / 2 + 40;
+    _touchPanX = Math.max(-maxPan, Math.min(maxPan, _touchPanX));
+    _touchPanY = Math.max(-maxPan, Math.min(maxPan, _touchPanY));
+    canvas.style.transform = `scale(${_touchZoom}) translate(${_touchPanX / _touchZoom}px, ${_touchPanY / _touchZoom}px)`;
+    canvas.style.transformOrigin = 'center center';
+  }
+
+  function _pinchDist(touches) {
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  canvas.addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    if (e.touches.length === 1) {
+      _tapStartX = e.touches[0].clientX;
+      _tapStartY = e.touches[0].clientY;
+      _panStartX = e.touches[0].clientX;
+      _panStartY = e.touches[0].clientY;
+      _panStartPanX = _touchPanX;
+      _panStartPanY = _touchPanY;
+      _touchMoved = false;
+    } else if (e.touches.length === 2) {
+      _pinchStartDist = _pinchDist(e.touches);
+      _pinchStartZoom = _touchZoom;
+      _touchMoved = true;
+    }
+  }, { passive: false });
+
+  canvas.addEventListener('touchmove', function(e) {
+    e.preventDefault();
+    if (e.touches.length === 2) {
+      const dist = _pinchDist(e.touches);
+      _touchZoom = Math.max(1, Math.min(4, _pinchStartZoom * (dist / _pinchStartDist)));
+      if (_touchZoom === 1) { _touchPanX = 0; _touchPanY = 0; }
+      _applyTransform();
+      _touchMoved = true;
+    } else if (e.touches.length === 1 && _touchZoom > 1) {
+      const dx = e.touches[0].clientX - _panStartX;
+      const dy = e.touches[0].clientY - _panStartY;
+      _touchPanX = _panStartPanX + dx;
+      _touchPanY = _panStartPanY + dy;
+      _applyTransform();
+      if (Math.abs(dx) > 4 || Math.abs(dy) > 4) _touchMoved = true;
+    }
+  }, { passive: false });
+
+  canvas.addEventListener('touchend', function(e) {
+    e.preventDefault();
+    if (!_touchMoved && e.changedTouches.length === 1) {
+      // It's a tap — map through transform to canvas coords
+      const rect = canvas.getBoundingClientRect();
+      const touch = e.changedTouches[0];
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const x = (touch.clientX - rect.left) * scaleX;
+      const y = (touch.clientY - rect.top) * scaleY;
+      const cell = getCellFromPoint(x, y);
+      if (cell) {
+        if (markedCells[cell.key]) { delete markedCells[cell.key]; }
+        else { markedCells[cell.key] = selectedColor; }
+        localStorage.setItem(storageKey, JSON.stringify(markedCells));
+        redraw();
+        updateStats();
+      }
+    }
+    if (e.touches.length === 0 && _touchZoom <= 1.05) {
+      _touchZoom = 1; _touchPanX = 0; _touchPanY = 0;
+      _applyTransform();
+    }
+  }, { passive: false });
 
   redraw();
 }
