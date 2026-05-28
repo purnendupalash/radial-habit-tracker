@@ -917,14 +917,21 @@
   @media (max-width: 700px) {
 
     /* Lock body from bouncing/scrolling */
+    html {
+      height: 100dvh;
+      width: 100%;
+    }
+
     body {
       overflow: hidden;
       height: 100dvh;
+      width: 100%;
       overscroll-behavior: none;
     }
 
     /* Setup screen: fill viewport, scroll internally if keyboard pushes content */
     #setup-screen {
+      width: 100%;
       height: 100dvh;
       max-height: 100dvh;
       overflow-y: auto;
@@ -932,12 +939,21 @@
       -webkit-overflow-scrolling: touch;
       padding: 1.25rem 0.875rem 2rem;
       justify-content: flex-start;
+      background: var(--surface);
     }
 
-    /* Card: full-width, tighter padding, smaller radius */
+    /* Hide floating hearts bg on mobile */
+    body::before {
+      display: none;
+    }
+
+    /* Flatten card into the screen — no border, shadow, or radius */
     .setup-card {
       padding: 1.5rem 1.25rem 1.75rem;
-      border-radius: 20px;
+      border-radius: 0;
+      border: none;
+      box-shadow: none;
+      background: var(--surface);
       max-width: 100%;
     }
 
@@ -997,6 +1013,7 @@
 
     /* Tracker screen */
     #tracker-screen {
+      width: 100%;
       height: 100dvh;
       max-height: 100dvh;
       overflow: hidden;
@@ -1158,6 +1175,15 @@
   }
 
   @media (max-width: 400px) {
+    /* Stack month/year into single column on very small phones */
+    .month-row {
+      grid-template-columns: 1fr;
+    }
+
+    .setup-card {
+      padding: 1.25rem 1rem 1.5rem;
+    }
+
     .habits-sidebar {
       max-height: 36vh;
     }
