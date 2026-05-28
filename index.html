@@ -1020,17 +1020,39 @@
     }
 
     /* Header: tighten up */
+    .tracker-header {
+      width: 100%;
+      overflow: hidden;
+    }
+
     .tracker-header-left {
       width: auto;
+      flex-shrink: 0;
       padding: 0.625rem 0.75rem;
       border-right: none;
     }
 
     .tracker-header-center {
-      padding: 0.625rem 0.5rem;
+      flex: 1;
+      min-width: 0;
+      padding: 0.625rem 0.25rem;
+      overflow: hidden;
+    }
+
+    .tracker-title {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tracker-month {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .tracker-header-right {
+      flex-shrink: 0;
       padding: 0.625rem 0.75rem 0.625rem 0;
     }
 
@@ -1823,13 +1845,13 @@ window.addEventListener('resize', () => {
   }
 });
 
-// Disable pinch-to-zoom on mobile
+// Disable pinch-to-zoom on mobile (exclude canvas so cell taps still work)
 document.addEventListener('touchmove', function(e) {
-  if (e.touches.length > 1) e.preventDefault();
+  if (e.touches.length > 1 && e.target.id !== 'radial-canvas') e.preventDefault();
 }, { passive: false });
 
 document.addEventListener('gesturestart', function(e) {
-  e.preventDefault();
+  if (e.target.id !== 'radial-canvas') e.preventDefault();
 }, { passive: false });
 </script>
 </body>
