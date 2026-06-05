@@ -1,0 +1,25 @@
+{
+  "name": "radial-habit-tracker",
+  "version": "1.0.0",
+  "description": "Radial Habit Tracker with Vercel Web Analytics",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"No tests specified\"",
+    "dev": "npx serve .",
+    "start": "npx serve ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/purnendupalash/radial-habit-tracker.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/purnendupalash/radial-habit-tracker/issues"
+  },
+  "homepage": "https://github.com/purnendupalash/radial-habit-tracker#readme",
+  "dependencies": {
+    "@vercel/analytics": "^2.0.1"
+  }
+}
