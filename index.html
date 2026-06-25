@@ -1,4 +1,6 @@
 
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1628,9 +1630,21 @@ function setupCanvas(animate = false) {
     requestAnimationFrame(() => canvas.classList.add('animate-in'));
   }
 
-  canvas.addEventListener('click', handleCanvasClick);
-  canvas.addEventListener('mousemove', handleMouseMove);
-  canvas.addEventListener('mouseleave', () => { document.getElementById('tooltip').style.display='none'; });
+  // Remove any previously attached listeners before re-adding to avoid duplicates
+  // when setupCanvas() is called again (e.g. returning from the setup screen).
+  if (canvas._handleClick) canvas.removeEventListener('click', canvas._handleClick);
+  if (canvas._handleMouseMove) canvas.removeEventListener('mousemove', canvas._handleMouseMove);
+  if (canvas._handleMouseLeave) canvas.removeEventListener('mouseleave', canvas._handleMouseLeave);
+  if (canvas._handleTouchStart) canvas.removeEventListener('touchstart', canvas._handleTouchStart);
+  if (canvas._handleTouchMove) canvas.removeEventListener('touchmove', canvas._handleTouchMove);
+  if (canvas._handleTouchEnd) canvas.removeEventListener('touchend', canvas._handleTouchEnd);
+
+  canvas._handleClick = handleCanvasClick;
+  canvas._handleMouseMove = handleMouseMove;
+  canvas._handleMouseLeave = () => { document.getElementById('tooltip').style.display='none'; };
+  canvas.addEventListener('click', canvas._handleClick);
+  canvas.addEventListener('mousemove', canvas._handleMouseMove);
+  canvas.addEventListener('mouseleave', canvas._handleMouseLeave);
 
   // Touch handling: pinch-to-zoom + pan + tap
   let _touchZoom = 1, _touchPanX = 0, _touchPanY = 0;
@@ -1652,7 +1666,7 @@ function setupCanvas(animate = false) {
     return Math.sqrt(dx * dx + dy * dy);
   }
 
-  canvas.addEventListener('touchstart', function(e) {
+  canvas._handleTouchStart = function(e) {
     e.preventDefault();
     if (e.touches.length === 1) {
       _tapStartX = e.touches[0].clientX;
@@ -1667,9 +1681,9 @@ function setupCanvas(animate = false) {
       _pinchStartZoom = _touchZoom;
       _touchMoved = true;
     }
-  }, { passive: false });
+  };
 
-  canvas.addEventListener('touchmove', function(e) {
+  canvas._handleTouchMove = function(e) {
     e.preventDefault();
     if (e.touches.length === 2) {
       const dist = _pinchDist(e.touches);
@@ -1685,9 +1699,9 @@ function setupCanvas(animate = false) {
       _applyTransform();
       if (Math.abs(dx) > 4 || Math.abs(dy) > 4) _touchMoved = true;
     }
-  }, { passive: false });
+  };
 
-  canvas.addEventListener('touchend', function(e) {
+  canvas._handleTouchEnd = function(e) {
     e.preventDefault();
     if (!_touchMoved && e.changedTouches.length === 1) {
       // Map touch to CSS pixel canvas coords (cellPaths are in CSS px space)
@@ -1708,7 +1722,11 @@ function setupCanvas(animate = false) {
       _touchZoom = 1; _touchPanX = 0; _touchPanY = 0;
       _applyTransform();
     }
-  }, { passive: false });
+  };
+
+  canvas.addEventListener('touchstart', canvas._handleTouchStart, { passive: false });
+  canvas.addEventListener('touchmove', canvas._handleTouchMove, { passive: false });
+  canvas.addEventListener('touchend', canvas._handleTouchEnd, { passive: false });
 
   redraw();
 }
@@ -1717,9 +1735,8 @@ function getArcParams(canvasW, canvasH) {
   const diameter = Math.min(canvasW, canvasH);
   const cx = canvasW / 2;
   const cy = canvasH / 2;
-  const isMobile = window.innerWidth <= 700;
-  const labelMargin = isMobile ? diameter * 0.07 : diameter * 0.10;
-  const innerR = isMobile ? diameter * 0.10 : diameter * 0.18;
+  const labelMargin = diameter * 0.10;
+  const innerR = diameter * 0.18;
   const outerR = diameter * 0.5 - labelMargin;
   const ringW = (outerR - innerR) / habits.length;
   return { cx, cy, innerR, outerR, ringW, diameter };
@@ -1755,7 +1772,7 @@ function redraw() {
     const midAngle = dayAngle + anglePerDay / 2;
 
     // Day number label — placed just outside the outermost ring
-    const labelR = outerR + size * 0.04;
+    const labelR = outerR + size * 0.055;
     const lx = Math.round(cx + Math.cos(midAngle) * labelR);
     const ly = Math.round(cy + Math.sin(midAngle) * labelR);
     ctx.font = `800 ${fontSize}px Nunito, sans-serif`;
