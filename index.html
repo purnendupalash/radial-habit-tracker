@@ -26,7 +26,7 @@
     --card-shadow: 0 8px 40px rgba(255, 107, 157, 0.18), 0 2px 8px rgba(255,107,157,0.10);
   }
 
-  /* ==== ORIGINAL THEME ==== */
+  /* === ORIGINAL THEME === */
   body.theme-original {
     --bg: #f5f2eb;
     --surface: #ffffff;
@@ -1690,13 +1690,11 @@ function setupCanvas(animate = false) {
   canvas.addEventListener('touchend', function(e) {
     e.preventDefault();
     if (!_touchMoved && e.changedTouches.length === 1) {
-      // It's a tap — map through transform to canvas coords
+      // Map touch to CSS pixel canvas coords (cellPaths are in CSS px space)
       const rect = canvas.getBoundingClientRect();
       const touch = e.changedTouches[0];
-      const scaleX = canvas.width / rect.width;
-      const scaleY = canvas.height / rect.height;
-      const x = (touch.clientX - rect.left) * scaleX;
-      const y = (touch.clientY - rect.top) * scaleY;
+      const x = (touch.clientX - rect.left) * (parseFloat(canvas.style.width) / rect.width);
+      const y = (touch.clientY - rect.top) * (parseFloat(canvas.style.height) / rect.height);
       const cell = getCellFromPoint(x, y);
       if (cell) {
         if (markedCells[cell.key]) { delete markedCells[cell.key]; }
@@ -1830,8 +1828,8 @@ function getCellFromPoint(px, py) {
 
 function getCanvasXY(e) {
   const rect = canvas.getBoundingClientRect();
-  const scaleX = canvas.width / rect.width;
-  const scaleY = canvas.height / rect.height;
+  const scaleX = parseFloat(canvas.style.width) / rect.width;
+  const scaleY = parseFloat(canvas.style.height) / rect.height;
   const clientX = e.touches ? e.touches[0].clientX : e.clientX;
   const clientY = e.touches ? e.touches[0].clientY : e.clientY;
   return {
