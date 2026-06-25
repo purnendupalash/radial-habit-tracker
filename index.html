@@ -1542,7 +1542,12 @@ function generateTracker() {
   const ts = document.getElementById('tracker-screen');
   ts.style.display = 'flex';
   ts.classList.remove('animate-in');
-  requestAnimationFrame(() => ts.classList.add('animate-in'));
+  // On mobile, skip the fadeInUp on the tracker screen — translateY shifts the header
+  // off the top of the viewport because #tracker-screen uses overflow:hidden + height:100dvh.
+  // The canvas spinIn animation is sufficient on mobile.
+  if (window.innerWidth > 700) {
+    requestAnimationFrame(() => ts.classList.add('animate-in'));
+  }
 
   // Auto-open the colour bar, hide FAB
   buildColorPopup();
@@ -1630,21 +1635,9 @@ function setupCanvas(animate = false) {
     requestAnimationFrame(() => canvas.classList.add('animate-in'));
   }
 
-  // Remove any previously attached listeners before re-adding to avoid duplicates
-  // when setupCanvas() is called again (e.g. returning from the setup screen).
-  if (canvas._handleClick) canvas.removeEventListener('click', canvas._handleClick);
-  if (canvas._handleMouseMove) canvas.removeEventListener('mousemove', canvas._handleMouseMove);
-  if (canvas._handleMouseLeave) canvas.removeEventListener('mouseleave', canvas._handleMouseLeave);
-  if (canvas._handleTouchStart) canvas.removeEventListener('touchstart', canvas._handleTouchStart);
-  if (canvas._handleTouchMove) canvas.removeEventListener('touchmove', canvas._handleTouchMove);
-  if (canvas._handleTouchEnd) canvas.removeEventListener('touchend', canvas._handleTouchEnd);
-
-  canvas._handleClick = handleCanvasClick;
-  canvas._handleMouseMove = handleMouseMove;
-  canvas._handleMouseLeave = () => { document.getElementById('tooltip').style.display='none'; };
-  canvas.addEventListener('click', canvas._handleClick);
-  canvas.addEventListener('mousemove', canvas._handleMouseMove);
-  canvas.addEventListener('mouseleave', canvas._handleMouseLeave);
+  canvas.addEventListener('click', handleCanvasClick);
+  canvas.addEventListener('mousemove', handleMouseMove);
+  canvas.addEventListener('mouseleave', () => { document.getElementById('tooltip').style.display='none'; });
 
   // Touch handling: pinch-to-zoom + pan + tap
   let _touchZoom = 1, _touchPanX = 0, _touchPanY = 0;
@@ -1666,7 +1659,7 @@ function setupCanvas(animate = false) {
     return Math.sqrt(dx * dx + dy * dy);
   }
 
-  canvas._handleTouchStart = function(e) {
+  canvas.addEventListener('touchstart', function(e) {
     e.preventDefault();
     if (e.touches.length === 1) {
       _tapStartX = e.touches[0].clientX;
@@ -1681,9 +1674,9 @@ function setupCanvas(animate = false) {
       _pinchStartZoom = _touchZoom;
       _touchMoved = true;
     }
-  };
+  }, { passive: false });
 
-  canvas._handleTouchMove = function(e) {
+  canvas.addEventListener('touchmove', function(e) {
     e.preventDefault();
     if (e.touches.length === 2) {
       const dist = _pinchDist(e.touches);
@@ -1699,9 +1692,9 @@ function setupCanvas(animate = false) {
       _applyTransform();
       if (Math.abs(dx) > 4 || Math.abs(dy) > 4) _touchMoved = true;
     }
-  };
+  }, { passive: false });
 
-  canvas._handleTouchEnd = function(e) {
+  canvas.addEventListener('touchend', function(e) {
     e.preventDefault();
     if (!_touchMoved && e.changedTouches.length === 1) {
       // Map touch to CSS pixel canvas coords (cellPaths are in CSS px space)
@@ -1722,11 +1715,7 @@ function setupCanvas(animate = false) {
       _touchZoom = 1; _touchPanX = 0; _touchPanY = 0;
       _applyTransform();
     }
-  };
-
-  canvas.addEventListener('touchstart', canvas._handleTouchStart, { passive: false });
-  canvas.addEventListener('touchmove', canvas._handleTouchMove, { passive: false });
-  canvas.addEventListener('touchend', canvas._handleTouchEnd, { passive: false });
+  }, { passive: false });
 
   redraw();
 }
